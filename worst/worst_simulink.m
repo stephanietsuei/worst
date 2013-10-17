@@ -265,11 +265,6 @@ while ((~converged) && (iterations <= max_iterations))
     if has_del 
         lambdad0 = back_output.lambdad0 ;
     end;
-    %{
-    [gamma, kappa, lambdad0] = worst_simulink_backward(model_name,time_axis, ...
-        x, nu, xi, u.signals.values, v.signals.values, param_list, ...
-        nominal_input, nominal_t, has_U, has_u, has_v, has_del);
-    %}
     
     
     % Realign the system
@@ -291,12 +286,9 @@ while ((~converged) && (iterations <= max_iterations))
     end
     realign_output = worst_realign(time_axis, has_u, has_v, has_del, ...
         realign_input); 
-    %{
-    [lambdaD, new_u, new_v, new_params] = worst_realign(gamma, kappa, ...
-        params, lambdad0, disturbance_specs, unmodeled_io, ...
-        u.signals.values, v.signals.values, z, time_axis, has_u, ...
-        has_v, has_del);
-    %}
+
+    
+    % Store new values for next iteration
     if has_u
         u.signals.values = realign_output.u;
     end
