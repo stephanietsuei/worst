@@ -35,10 +35,5 @@ output_struct = ...
           'disturbance_specs', disturbance_specs, 'error_tol', error_tol, ...
           'nominal_input', nominal_input, 'nominal_time', nominal_time);
       
-display(['Total cost is: ' num2str(output_struct.cost)]);
-
-figure
-plot(output_struct.time_axis, output_struct.d)
-title(['Worst possible disturbance for Dubin''s' ' Car'])
-xlabel('Time')
-ylabel('Disturbance')
+% Plot the distribution of worst values
+hist(output_struct.costs)

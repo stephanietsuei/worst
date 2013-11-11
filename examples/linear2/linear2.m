@@ -28,14 +28,9 @@ error_tol = .01;
 
 
 output_struct = ...
-    worst('simulink', model_name, output_dim, 'ti', ti_val, 'tf', tf_val, ...
+    worst(model_name, output_dim, 'ti', ti_val, 'tf', tf_val, ...
           'disturbance_specs', disturbance_specs, 'error_tol', error_tol, ...
           'params', params);
       
-display(['Total cost is: ' num2str(output_struct.cost)]);
-
-figure
-plot(output_struct.time_axis, output_struct.d)
-title(['Worst possible disturbance'])
-xlabel('Time')
-ylabel('Disturbance')
+% Plot the distribution of worst values
+hist(output_struct.costs)

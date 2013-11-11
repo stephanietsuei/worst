@@ -1,4 +1,4 @@
-function output_struct = worst(varargin)
+function output = worst(varargin)
 
 
 % Parser for simulink input
@@ -14,6 +14,7 @@ addParamValue(simulink_parse, 'unmodeled_io', [], @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'params', [], @(x) isa(x, 'double'));
 addParamValue(simulink_parse, 'max_iter', 40, @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'error_tol', .01, @(x) isa(x,'double'));
+addParamValue(simulink_parse, 'num_iter', 10, @(x) ((mod(x,1)==0) && (x > 0)))
 
 
 % Parse input for each type of input
@@ -29,6 +30,7 @@ system_name = simulink_parse.Results.system_name;
 tf = simulink_parse.Results.tf;
 ti = simulink_parse.Results.ti;
 unmodeled_io = simulink_parse.Results.unmodeled_io;
+num_iter = simulink_parse.Results.num_iter;
 
 
 % Some more input checking
@@ -57,10 +59,24 @@ if ~isempty(params)
 end
 
 
-% Call worst
-output_struct = worst_simulink(system_name, disturbance_specs, ...
-    unmodeled_io, params, nominal_input, nominal_time, ti, tf, max_iter, ...
-    output_dim, error_tol);
+% Call worst num_iter times and store its output
+output.costs = zeros(1,num_iter);
+output.converged = zeros(1,num_iter);
+output.time_axis = cell(1,num_iter);
+if ~isempty(params), output.parm = cell(1,num_iter); end;
+if ~isempty(disturbance_specs), output.d = cell(1,num_iter); end;
+if ~isempty(unmodeled_io), output.v = cell(1,num_iter); end;
+for i = 1:num_iter
+    output_struct = worst_simulink(system_name, disturbance_specs, ...
+        unmodeled_io, params, nominal_input, nominal_time, ti, tf, max_iter, ...
+        output_dim, error_tol);
+    output.costs(i) = output_struct.cost;
+    output.converged(i) = output_struct.converged;
+    output.time_axis{i} = output_struct.time_axis;
+    if ~isempty(params), output.parm{i} = output_struct.parm; end;
+    if ~isempty(disturbance_specs), output.d{i} = output_struct.d; end;
+    if ~isempty(unmodeled_io), output.v{i} = output_struct.v; end;
+end
 
 
 end
