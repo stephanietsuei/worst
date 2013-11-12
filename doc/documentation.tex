@@ -1,0 +1,183 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{subfigure}
+
+\newcommand{\xb}{\mathbf{x}}
+\newcommand{\ub}{\mathbf{u}}
+\newcommand{\vb}{\mathbf{v}}
+\newcommand{\zb}{\mathbf{z}}
+\newcommand{\nub}{\bm{\nu}}
+\newcommand{\xib}{\bm{\xib}}
+\newcommand{\gammab}{\bm{\gamma}}
+\newcommand{\kappab}{\bm{\kappa}}
+\newcommand{\lambdab}{\bm{\lambda}}
+\newcommand{\deltab}{\bm{\delta}}
+\newcommand{\Ub}{\mathbf{U}}
+\newcommand{\Yb}{\mathbf{Y}}
+\newcommand{\hb}{\mathbf{h}}
+\newcommand{\yb}{\mathbf{y}}
+
+
+\author{Stephanie Tsuei}
+\title{The Worst Toolbox Documentation}
+\date{Version 0.1a}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This toolbox implements the algorithm described in:
+
+\begin{quote}
+J. E. Tierno, R. M. Murray, J. C. Doyle, and I. M. Gregory,
+``Numerically Efficient Robustness Analysis of Trajectory Tracking for Nonlinear
+Systems," \emph{J. Guid. Control. Dyn.}, vol. 20, no. 4, pp. 640-647, Jul.
+1997.
+\end{quote}
+
+which uses theory presented in:
+
+\begin{quote}
+A. Bryson and Y. Ho, \emph{Applied optimal control: optimization,
+estimation, and control}, vol. 59, no. 8. 1975.
+\end{quote}
+
+
+
+\subsection{The Robust Trajectory Tracking Problem}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=4in]{system}
+\caption{A block diagram dipicting the robust trajectory generation problem.}
+\end{center}
+\label{sys}
+\end{figure}
+
+Consider the dynamical system pictured in Figure \ref{sys} with dynamics
+\[ \dot{\xb}(t) = f(\xb(t),\Ub(t),\ub(t),\vb(t),\deltab) \]
+and outputs
+\begin{align*}
+\Yb(t) &= g(\xb(t),\Ub(t),\ub(t),\vb(t),\deltab) \\
+\zb(t) &= h(\xb(t),\Ub(t),\ub(t),\vb(t),\deltab)
+\end{align*}
+where $\xb(t)$ is the state, $\Ub(t)$ is a nominal input signal, $\ub(t)$ is a
+disturbance signal, $\delta$ is a vector of uncertain parameters, $\Delta$ is
+an uncertain block of unit norm, and $\vb(t)$ and $\zb(t)$ are signals
+representing any possible unmodeled dynamics. Therefore, the nominal
+trajectory, is given by
+\[ \Yb_n(t) = g(\xb(t),\Ub(t),0,0,\deltab_n) \]
+where $\deltab_n$ are the nominal values of the uncertain parameters and the
+quantity $\yb(t) = \Yb(t) - \Yb_n(t)$ is the error signal.
+
+
+We make the following assumptions:
+\begin{itemize}
+	\item $\|\vb(t)\| = \|\zb(t)\|$
+	\item $\vb(t)$ and $\zb(t)$ can be written in block form $\vb(t) =
+	      \begin{bmatrix} \vb_1(t) & \vb_2(t) & \dots & \vb_p(t) 
+		  \end{bmatrix}^T$
+		  and $\zb(t) = \begin{bmatrix} \zb_1(t) & \zb_2(t) & \dots & \zb_p(t)
+		  \end{bmatrix}^T$. The total number of blocks in $\vb(t)$
+		  and $\zb(t)$ must be the same, but $\vb_i(t)$ and $\zb_i(t)$ can be of
+		  different dimensions.
+    \item $\|\ub(t)\|$ is a known constant scalar $M$ if there is only one
+    	  disturbance input. If there are multiple disturbance inputs
+		  $\ub_1(t)$, $\ub_2(t)$, then each disturbance input $i$ has a known 
+		  norm $M_i$.
+	\item $\underline{\deltab} \le \deltab_n \le \bar{\deltab}$ (elementwise) 
+	      where $\underline{\deltab}$ and $\bar{\deltab}$ are known constants.
+	\item We are only interested in the finite time interval $(t_i, t_f)$ and 
+	      for a vector-valued time signal $\mathbf{w}(t)$, \[\|\mathbf{w}(t)\|  
+		  = \left (\frac{1}{t_f-t_i} \int_{t_i}^{t_f}\mathbf{w}^T(t) 
+		  \mathbf{w}(t) dt \right )^{\frac{1}{2}}\]
+\end{itemize}
+
+Given the information above, this toolbox computes the functions $\ub(t)$,
+$\vb(t)$ and the value of $\deltab(t)$ that \emph{maximizes} the quantity
+below: 
+\[ J =  \|\yb(t)\| = \left ( \frac{1}{t_f - t_i} \int_{t_i}^{t_f} \yb(t)^T
+\yb(t) dt \right )^{\frac{1}{2}}  \]
+
+
+\subsection{System Requirements}
+Requirements:
+\begin{itemize}
+\item Matlab R2012b or later
+\item Simulink
+\end{itemize}
+The toolbox may work on some earlier versions of Matlab and Simulink, but was
+developed on Matlab R2012b.
+
+
+\subsection{Install Instructions}
+To install the Worst Toolbox, place the folder \texttt{worst/} anywhere on your
+local machine and add it (but not its subdirectories) to the Matlab path. This
+is equivalent to the running the command:
+
+\begin{quote}\texttt{addpath(`/path/to/robust/worst')} \end{quote}
+
+\section{Using Worst}
+
+\subsection{Simulink Model Configuration}
+The Worst toolbox makes some assumptions about the configuration of Simulink
+models:
+
+\subsubsection*{Order of Inputs}
+
+The program assumes that models have up to four input signals and two output
+signals. Each of the signals may have arbitrary dimension to accomodate multiple
+inputs, disturbances, and feedback signals. The order assumed is:
+\begin{enumerate}
+\item Nominal inputs, $\Ub(t)$
+\item Disturbance inputs, $\ub(t)$
+\item Unmodeled feedback inputs, $\vb(t)$
+\item Uncertain Parameters, $\deltab$
+\end{enumerate}
+
+\subsubsection*{Order of Outputs}
+
+Models are allowed to have an arbitrary number of outputs. If the Simulink model
+has a total of $r$ outputs, and the first $m <= r$ outputs are outputs included
+in computing the performance measure $J$, then the remaining $r - m$ outputs are
+unmodeled feedback outputs; the coordinates of $z$.
+
+
+\subsection{Syntax of \texttt{worst}}
+
+
+
+
+\subsection{Speeding up the Program}
+
+\begin{figure}
+\begin{center}
+\subfigure[Original Simulink
+Diagram]{\includegraphics[width=3.2in]{dubin\string_diagram}} 
+\subfigure[Diagram
+with S-Function]{\includegraphics[width=3.2in]{dubin\string_diagram\string_sfun}}
+\caption{A model of Dubin's Car compiled into an S-function.}
+\end{center}
+\label{sfunc}
+\end{figure}
+
+The program repeatedly calls \texttt{linmod} in order to build and simulate an
+adjoint system. This greatly slows down the program because Simulink will
+recompile the model with every call. To hasten computation, compile your
+Simulink model into an S-function before running the program, as shown in Figure
+\ref{sfunc}. The more blocks in the original Simulink model, the greater the
+improvement in speed.
+
+
+\section{Examples}
+\subsection{A Linear System}
+\subsection{Dubin's Car}
+\subsection{The Caltech Ducted Fan}
+
+
+
+\end{document}
