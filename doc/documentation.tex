@@ -5,6 +5,8 @@
 \usepackage{graphicx}
 \usepackage{bm}
 \usepackage{subfigure}
+\usepackage{float}
+\restylefloat{table}
 
 \newcommand{\xb}{\mathbf{x}}
 \newcommand{\ub}{\mathbf{u}}
@@ -103,6 +105,31 @@ below:
 \[ J =  \|\yb(t)\| = \left ( \frac{1}{t_f - t_i} \int_{t_i}^{t_f} \yb(t)^T
 \yb(t) dt \right )^{\frac{1}{2}}  \]
 
+\subsection{Notes on the Algorithm} \label{algnotes}
+\begin{enumerate}
+\item This algorithm is a power algorithm that is not a contraction. Therefore,
+it is not guaranteed to converge, but does in practice.
+
+\item The algorithm searches for local extrema (local minima \emph{and} local
+maxima). Therefore the value of $J$ that
+is computed is a lower bound on the actual value of $J$.
+
+\item Initial values for the worst case disturbance are randomly generated and
+the algorithm is sensitive to the initial value of the disturbance. Therefore,
+it is helpful to run the algorithm several times and plot a histogram of the
+values that it computes, as seen in the examples.
+
+\item Let $\mathbf{y}_1(t) = \begin{bmatrix}y_{1,1} (t) & y_{1,2}(t) & \dots &
+y_{1,m}(t)
+\end{bmatrix}$ be the error output signal from the previous iteration and $\mathbf{y}_2(t) = \begin{bmatrix} y_{2,1}(t) & y_{2,2}(t) &
+\dots & y_{m,2}(t) \end{bmatrix}$ be the error output signal from the current
+iteration. The algorithm declares that it has converged when
+\[ \max_{i = 1,2,\dots,m} \frac{\sum_{j=1}^T (y_{1,i}(j) - y_{2,i}(j))^2}{\sum_{j=1}^T
+y_{1,i}(j)^2 } < e \]
+where $e$ is a small positive number and $T$ is the number of timesteps.
+
+\end{enumerate}
+
 
 \subsection{System Requirements}
 Requirements:
@@ -142,14 +169,69 @@ inputs, disturbances, and feedback signals. The order assumed is:
 \subsubsection*{Order of Outputs}
 
 Models are allowed to have an arbitrary number of outputs. If the Simulink model
-has a total of $r$ outputs, and the first $m <= r$ outputs are outputs included
+has a total of $r$ outputs, and the first $m\leq r$ outputs are outputs included
 in computing the performance measure $J$, then the remaining $r - m$ outputs are
 unmodeled feedback outputs; the coordinates of $z$.
 
 
 \subsection{Syntax of \texttt{worst}}
+The syntax for \texttt{worst} is:
+\begin{quote}
+\texttt{worst(system\_name, output\_dimension, 'Parameter1', value1,
+'Parameter2', value2, ...)}
+\end{quote}
+\texttt{system\_name} is the name of the Simulink model (make sure the model is
+in the MATLAB path!) and \texttt{output\_dimension} is the dimension of the
+system's output. The parameters are optional values, described in the table
+below:
 
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| c | c | p{9cm} |}
+\hline
+\textbf{Name} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+\texttt{ti} & 0 & Simulation start time in seconds \\
+\hline 
+\texttt{tf} & 10 & Simulation end time in seconds \\
+\hline
+\texttt{params} & \texttt{[]} & A $p$ by 3 matrix where $p$ is the number of
+uncertain scalar parameters. Each row has the format:
+\texttt{[lower\_bound, nominal\_value, upper\_bound]}\\
+\hline
+\texttt{disturbance\_specs} & \texttt{[]} & A $d$ by 2 matrix where $d$ is the
+number of disturbances. Each row has the format:
 
+\texttt{[disturbance\_dimension, disturbance\_norm]} \\
+\hline
+\texttt{unmodeled\_io} & \texttt{[]} & A $b$ by 2 matrix where $b$ is the number
+of unmodeled input-output pairs. The left column has all the dimensions of the
+unmodeled inputs $\mathbf{v}$ and the right column has all the corresponding
+dimensions of the unmodeled outputs $\mathbf{z}$.\\
+\hline
+\texttt{max\_iter} & 40 & The maximum number of times to iterate the algorithm
+when computing a single value of $J$.\\
+\hline
+\texttt{error\_tol} & .01 & The value $e$ in section \ref{algnotes} \\
+\hline
+\texttt{num\_iter} & 10 & The number of different values of $J$ to compute. \\
+\hline
+\texttt{nominal\_time} & \texttt{[]} & The time axis, a column vector for the
+nominal input, which is described below. \\
+\hline
+\texttt{nominal\_input} & \texttt{[]} & A $T$ by $q$ matrix describing the
+nominal input signal, where $T$ is the length of \texttt{nominal\_time} and $q$
+is the dimension of the nominal input. If a value for this parameter is
+specified, then so must a value for the nominal time axis. \\
+\hline
+\end{tabular}
+\label{inputparameters}
+\end{center}
+\end{table}
+
+Optional inputs whose default value is \texttt{[]} do not need to be specified
+and are not necessary for the program to run. If there are no uncertain
+parameters in the system, do not specify any uncertain parameters.
 
 
 \subsection{Speeding up the Program}
@@ -157,9 +239,9 @@ unmodeled feedback outputs; the coordinates of $z$.
 \begin{figure}
 \begin{center}
 \subfigure[Original Simulink
-Diagram]{\includegraphics[width=3.2in]{dubin\string_diagram}} 
-\subfigure[Diagram
-with S-Function]{\includegraphics[width=3.2in]{dubin\string_diagram\string_sfun}}
+Diagram]{\includegraphics[width=3.2in]{dubin\string_diagram}}
+\subfigure[Diagram with 
+	S-Function]{\includegraphics[width=3.2in]{dubin\string_diagram\string_sfun}}
 \caption{A model of Dubin's Car compiled into an S-function.}
 \end{center}
 \label{sfunc}
@@ -174,9 +256,12 @@ improvement in speed.
 
 
 \section{Examples}
-\subsection{A Linear System}
+A few examples are below. Since compiled S-functions are not compatible across
+all systems, the Simulink models of the examples are not compiled.
+
+\subsection{A Very Simple Linear System}
+\subsection{A Less Simple Linear System}
 \subsection{Dubin's Car}
-\subsection{The Caltech Ducted Fan}
 
 
 
