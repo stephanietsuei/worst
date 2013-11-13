@@ -302,7 +302,7 @@ while ((~converged) && (iterations <= max_iterations))
     
     
     % Compute whether or not we're done
-    error = max(sum((last_output-output).^2)/sum(output.^2));
+    error = max(sum((last_output-output).^2)./sum(last_output.^2));
     if (error < error_tol)
         converged = 1;
     end
