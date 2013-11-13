@@ -1,10 +1,15 @@
 \documentclass{article}
 
+% Note: Building this .tex file requires the mcode package avaialble at
+% http://www.mathworks.com/matlabcentral/fileexchange/8015-m-code-latex-package
+
 \usepackage{fullpage}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{bm}
 \usepackage{subfigure}
+\usepackage[framed]{mcode}
+\usepackage{color}
 \usepackage{float}
 \restylefloat{table}
 
@@ -120,13 +125,12 @@ it is helpful to run the algorithm several times and plot a histogram of the
 values that it computes, as seen in the examples.
 
 \item Let $\mathbf{y}_1(t) = \begin{bmatrix}y_{1,1} (t) & y_{1,2}(t) & \dots &
-y_{1,m}(t)
-\end{bmatrix}$ be the error output signal from the previous iteration and $\mathbf{y}_2(t) = \begin{bmatrix} y_{2,1}(t) & y_{2,2}(t) &
-\dots & y_{m,2}(t) \end{bmatrix}$ be the error output signal from the current
-iteration. The algorithm declares that it has converged when
-\[ \max_{i = 1,2,\dots,m} \frac{\sum_{j=1}^T (y_{1,i}(j) - y_{2,i}(j))^2}{\sum_{j=1}^T
-y_{1,i}(j)^2 } < e \]
-where $e$ is a small positive number and $T$ is the number of timesteps.
+y_{1,m}(t) \end{bmatrix}$ be the error output signal from the previous iteration
+and $\mathbf{y}_2(t) = \begin{bmatrix} y_{2,1}(t) & y_{2,2}(t) & \dots &
+y_{m,2}(t) \end{bmatrix}$ be the error output signal from the current iteration.
+The algorithm declares that it has converged when \[ \max_{i = 1,2,\dots,m}
+\frac{\sum_{j=1}^T (y_{1,i}(j) - y_{2,i}(j))^2}{\sum_{j=1}^T y_{1,i}(j)^2 } < e
+\] where $e$ is a small positive number and $T$ is the number of timesteps.
 
 \end{enumerate}
 
@@ -234,6 +238,35 @@ and are not necessary for the program to run. If there are no uncertain
 parameters in the system, do not specify any uncertain parameters.
 
 
+\subsection{Output of \texttt{worst}}
+The output of \texttt{worst} is a struct containing the fields:
+\begin{enumerate}
+\item \texttt{converged}: A 1 by \texttt{num\_iter} array containing 0 for the
+calculations that did not converge and 1 for the calculations that converged.
+
+\item \texttt{costs}: A 1 by \texttt{num\_iter} array containing the final cost
+calculated during each iteration.
+
+\item \texttt{time\_axis}: A 1 by \texttt{num\_iter} cell array. Each entry
+contains the time axis for the worst case disturbance and feedback inputs of a
+computation of $\gamma$. Each time axis is a $T_i$ by 1 array, where $T_i$ is
+the number of timesteps in computation $i$.
+
+\item \texttt{v}: A 1 by \texttt{num\_iter} cell array. Each entry contains the
+worst case unmodeled feedback input, an array with $T_i$ rows, from a
+computation of $\gamma$. If there are multiple unmodeled feedback inputs, then
+the inputs are just concatenated horizontally into one array. The time axis
+entry $i$ in \texttt{v} is \texttt{time\_axis}\{i\}.
+
+\item \texttt{d}: Same as for \texttt{v} above, except with the worst case
+disturbances.
+
+\item \texttt{p}: A 1 by \texttt{num\_iter} cell array. Each entry of the cell
+array contains an array containing the worst parameter values from each
+computation of $\gamma$.
+\end{enumerate}
+
+
 \subsection{Speeding up the Program}
 
 \begin{figure}
@@ -259,10 +292,51 @@ improvement in speed.
 A few examples are below. Since compiled S-functions are not compatible across
 all systems, the Simulink models of the examples are not compiled.
 
-\subsection{A Very Simple Linear System}
-\subsection{A Less Simple Linear System}
-\subsection{Dubin's Car}
+\subsection{A Simple Linear System}
+Consider the system
+\begin{gather*}
+\begin{bmatrix} \dot{x}_1(t) \\ \dot{x}_2(t) \end{bmatrix} = 
+	\begin{bmatrix} -3 & a \\ 2 & -5 \end{bmatrix}
+	\begin{bmatrix} x_1 \\ x_2 \end{bmatrix} + 
+	\begin{bmatrix} 1 \\ 2 \end{bmatrix} u(t) + 
+	\begin{bmatrix} 2 \\ 1 \end{bmatrix} v(t) \\
+Y(t) = x_1(t) + v(t) \\
+z(t) = -x_2(t) + v(t)
+\end{gather*}
+where $-1 \leq a \leq 1$ is an uncertain parameter, $u(t)$ is a norm 1
+disturbance, and $v(t)$ is the unmodeled feedback input. The code for the system
+is below.
 
+\lstinputlisting{../examples/linear1/linear1.m}
+
+\subsection{A Linear System with Missing Pieces}
+Consider the system
+\begin{gather*}
+\begin{bmatrix} \dot{x}_1 \\ \dot{x}_2 \end{bmatrix} = 
+	\begin{bmatrix} -3 & a \\ 2 & -5 \end{bmatrix}
+	\begin{bmatrix} x_1 \\ x_2 \end{bmatrix} +
+	\begin{bmatrix} 1 \\ 2 \end{bmatrix} u(t) \\
+y(t) = x_1(t)
+\end{gather*}
+where $-1 \leq a \leq 1$ is a scalar uncertain parameter and $u(t)$ is a
+one-norm disturbance. There are no uncertain feedback loops or nominal input
+signals.
+
+\lstinputlisting{../examples/linear2/linear2.m}
+
+
+\subsection{Dubin's Car}
+The kinematics of Dubin's Car are
+\begin{gather*}
+\dot{x} = \cos(\theta) \\
+\dot{y} = \sin(\theta) \\
+\dot{\theta} = U(t) + u(t)
+\end{gather*}
+where $\begin{bmatrix} x & y & \theta \end{bmatrix}^T$ is the state, $U(t)$ is a
+scalar nominal input, and $u(t)$ is a scalar disturbance with $\|u\| = 2$. The
+output of the system is the full state. There are no uncertain feedback loops.
+
+\lstinputlisting{../examples/dubin/dubincar.m}
 
 
 \end{document}
