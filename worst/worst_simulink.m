@@ -1,6 +1,6 @@
 function out = worst_simulink(model_name, disturbance_specs, unmodeled_io, ...
     params, nominal_input, nominal_t, ti, tf, max_iterations, output_dim, ...
-    error_tol)
+    error_tol, averaging)
 
 % Computes the worst case error norm of a system given a proper simulink
 % model. For now, this file assumes the following
@@ -42,18 +42,10 @@ has_u = 1;
 has_v = 1;
 has_del = 1;
 
-if isempty(nominal_input)
-    has_U = 0;
-end
-if isempty(disturbance_specs)
-    has_u = 0;
-end
-if isempty(unmodeled_io)
-    has_v = 0;
-end
-if isempty(params)
-    has_del = 0;
-end
+if isempty(nominal_input), has_U = 0; end
+if isempty(disturbance_specs), has_u = 0; end
+if isempty(unmodeled_io), has_v = 0; end
+if isempty(params), has_del = 0; end
 
 if isequal([has_u,has_v,has_del], [0 0 0])
     display('Why are you even using this program?')
@@ -82,7 +74,7 @@ end
 
 
 % Get useful variables
-if has_u
+if has_u, 
     total_disturbance_dim = sum(disturbance_specs(:,1));
 else
     total_disturbance_dim = 0;
@@ -181,9 +173,7 @@ end
 
 
 % Initialize costate for unmodeled inputs
-if has_v
-    lambdaD = ones(1, num_unmodeled_in);
-end
+if has_v, lambdaD = ones(1, num_unmodeled_in); end
 
 
 %------------------------------------------------------------------------------%
@@ -208,15 +198,9 @@ while ((~converged) && (iterations <= max_iterations))
     
     
     % Integrate the system forward in time
-    if has_u
-        assignin('base','nom_u',u);
-    end
-    if has_v
-        assignin('base','nom_v',v);
-    end
-    if has_del
-        assignin('base','nom_delta',delta);
-    end
+    if has_u, assignin('base','nom_u',u); end
+    if has_v, assignin('base','nom_v',v); end
+    if has_del, assignin('base','nom_delta',delta); end
     simout = sim(model_name, options_struct);
     t = simout.get('tout');
     yout = simout.get('yout');
@@ -256,15 +240,9 @@ while ((~converged) && (iterations <= max_iterations))
     % Integrate backward in time
     back_output = worst_simulink_backward(model_name, time_axis, x, nu, ...
         has_U, has_u, has_v, has_del, back_struct);
-    if has_u
-        gamma = back_output.gamma;
-    end
-    if has_v
-        kappa = back_output.kappa; 
-    end
-    if has_del 
-        lambdad0 = back_output.lambdad0 ;
-    end;
+    if has_u, gamma = back_output.gamma; end
+    if has_v, kappa = back_output.kappa; end
+    if has_del, lambdad0 = back_output.lambdad0; end
     
     
     % Realign the system
@@ -290,14 +268,29 @@ while ((~converged) && (iterations <= max_iterations))
     
     % Store new values for next iteration
     if has_u
-        u.signals.values = realign_output.u;
+        old_u = u.signals.values;
+        u.signals.values = realign_output.u; 
     end
     if has_v
+        old_v = v.signals.values;
         v.signals.values = realign_output.v;
         lambdaD = realign_output.lambdaD;
     end
-    if has_del
-        delta.signals.values = repmat(realign_output.params', N, 1);
+    if has_del, delta.signals.values = repmat(realign_output.params', N, 1); end
+    
+    
+    % If we're averaging values together for stability, then repeat the
+    % realign step with the new values of u, v, and z
+    if averaging
+        if has_u, realign_input.u = .5*(u.signals.values + old_u); end
+        if has_v, realign_input.v = .5*(v.signals.values + old_v); end
+        realign_output = worst_realign(time_axis, has_u, has_v, 0, ...
+            realign_input);
+        if has_u, u.signals.values = realign_output.u; end
+        if has_v, 
+            v.signals.values = realign_output.v;
+            lambdaD = realign_output.lambdaD;
+        end
     end
     
     
