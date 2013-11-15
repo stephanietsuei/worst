@@ -1,11 +1,6 @@
 function output_struct = worst_realign(time_axis, has_u, has_v, has_del, ...
     input_struct)
 
-%{
-worst_realign(gamma,
-    kappa, params, lambdad0, disturbance_specs, unmodeled_io, u, v, z,time_axis)
-%}
-
 N = length(time_axis);
 
 if has_u
