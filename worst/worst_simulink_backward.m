@@ -2,8 +2,6 @@ function output_struct = worst_simulink_backward(model_name, t, x,...
     nu, has_U, has_u, has_v, has_del, input_struct)
 
 
-    %nu, xi, u, v, params, U, Ut, has_U, has_u, has_v, has_del)
-
 % Get some useful variables
 state_dim = size(x,2);
 N = length(t);
@@ -12,9 +10,11 @@ output_dim = size(nu,2);
 if has_U
     U = input_struct.U;
     Ut = input_struct.Ut;
+    total_Udim = size(U,2);
 else
     U = [];
     Ut = [];
+    total_Udim = 0;
 end
 if has_u
     u = input_struct.u;
@@ -60,18 +60,20 @@ for i = 1:N
     [~,B,~,D] = linmod(model_name, x(i,:)', [Ui; now_u; now_v; params]);
     
     if has_u
-        dfdu = B(:,1:total_udim);
-        dgdu = D(1:output_dim, 1:total_udim);
-        dhdu = D(output_dim+1:end, 1:total_udim);
+        dfdu = B(:,total_Udim+1:total_Udim+total_udim);
+        dgdu = D(1:output_dim, total_Udim+1:total_Udim+total_udim);
+        dhdu = D(output_dim+1:end, total_Udim+1:total_Udim+total_udim);
     else
         dfdu = [];
         dgdu = [];
         dhdu = [];
     end
     if has_v
-        dfdv = B(:,total_udim+1:total_udim+total_vdim);
-        dgdv = D(1:output_dim, total_udim+1:total_udim+total_vdim);
-        dhdv = D(output_dim+1:end, total_udim+1:total_udim+total_vdim);
+        dfdv = B(:,total_Udim+total_udim+1:total_Udim+total_udim+total_vdim);
+        dgdv = D(1:output_dim, ...
+                 total_Udim+total_udim+1:total_Udim+total_udim+total_vdim);
+        dhdv = D(output_dim+1:end, ...
+                 total_Udim+total_udim+1:total_Udim+total_udim+total_vdim);
     else
         dfdv = [];
         dgdv = [];
@@ -117,9 +119,9 @@ function deriv = back_deriv(time, lambda)
     dhdx = Ci(output_dim+1:end, :);
     
     if has_del
-        dfdd = Bi(:, total_udim+total_vdim+1:end);
-        dgdd = Di(1:output_dim, total_udim+total_vdim+1:end);
-        dhdd = Di(output_dim+1:end, total_udim+total_vdim+1:end);
+        dfdd = Bi(:, total_Udim+total_udim+total_vdim+1:end);
+        dgdd = Di(1:output_dim, total_Udim+total_udim+total_vdim+1:end);
+        dhdd = Di(output_dim+1:end, total_Udim+total_udim+total_vdim+1:end);
     else
         dfdd = [];
         dgdd = [];
