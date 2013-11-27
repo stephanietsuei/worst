@@ -97,8 +97,8 @@ end
 if has_del
     param_list = params(:,2);
     new_params = param_list + lambdad0;
-    new_params = min([new_params, params(:,3)]);
-    new_params = max([new_params, params(:,1)]);
+    new_params = min([new_params, params(:,3)],[],2);
+    new_params = max([new_params, params(:,1)],[],2);
     output_struct.params = new_params;
 end
 
