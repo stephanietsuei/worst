@@ -284,10 +284,12 @@ while ((~converged) && (iterations <= max_iterations))
     if averaging
         if has_u, realign_input.u = .5*(u.signals.values + old_u); end
         if has_v, realign_input.v = .5*(v.signals.values + old_v); end
-        realign_output = worst_realign(time_axis, has_u, has_v, 0, ...
-            realign_input);
+        if (has_u || has_v)
+            realign_output = worst_realign(time_axis, has_u, has_v, 0, ...
+                realign_input);
+        end
         if has_u, u.signals.values = realign_output.u; end
-        if has_v, 
+        if has_v,
             v.signals.values = realign_output.v;
             lambdaD = realign_output.lambdaD;
         end

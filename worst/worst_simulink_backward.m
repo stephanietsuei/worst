@@ -80,15 +80,18 @@ for i = 1:N
         dhdv = [];
     end
     
-
-    Cdyn = [dfdu', zeros(total_udim, num_params); ...
-            dfdv', zeros(total_vdim, num_params)];
-    Ddyn = [dgdu', dhdu'; dgdv', dhdv];
+    if (has_u || has_v)
+        Cdyn = [dfdu', zeros(total_udim, num_params); ...
+                dfdv', zeros(total_vdim, num_params)];
+        Ddyn = [dgdu', dhdu'; dgdv', dhdv];
+    end
     
     if has_u, now_nu = nu(i,:)'; else now_nu = []; end;
     if has_v, now_xi = xi(i,:)'; else now_xi = []; end;
     
-    output(i,:) = Cdyn*soln(i,:)' + Ddyn*[now_nu; now_xi];
+    if (has_u || has_v)
+        output(i,:) = Cdyn*soln(i,:)' + Ddyn*[now_nu; now_xi];
+    end
 end
 if has_u
     output_struct.gamma = -output(:, 1:total_udim);
@@ -98,7 +101,7 @@ if has_v
 end
 if has_del
     lambdad = soln(:, state_dim+1:end);
-    output_struct.lambdad0 = lambdad(1,:);
+    output_struct.lambdad0 = lambdad(1,:)';
 end
 
 
