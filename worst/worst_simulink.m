@@ -56,12 +56,12 @@ end
 simulink_input_str1 = '';
 simulink_input_str2 = '';
 if has_U
-    simulink_input_str1 = 'nomnom_U,';
-    simulink_input_str2 = 'nomnom_U,';
+    simulink_input_str1 = 'nomnom_U';
+    simulink_input_str2 = 'nomnom_U';
 end
 if has_u
-    simulink_input_str1 = [simulink_input_str1, 'nomnom_u1'];
-    simulink_input_str2 = [simulink_input_str2, 'nom_u'];
+    simulink_input_str1 = [simulink_input_str1, ',', 'nomnom_u1'];
+    simulink_input_str2 = [simulink_input_str2, ',', 'nom_u'];
 end
 if has_v
     simulink_input_str1 = [simulink_input_str1, ',', 'nomnom_v1'];
