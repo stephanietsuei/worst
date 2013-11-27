@@ -26,7 +26,6 @@ tf_val = 10;
 
 output_dim = 1;
 
-max_iterations = 10;
 error_tol = .01;
 
 

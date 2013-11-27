@@ -23,14 +23,13 @@ tf_val = 10;
 
 output_dim = 1;
 
-max_iterations = 10;
 error_tol = .01;
 
 
 output_struct = ...
     worst(model_name, output_dim, 'ti', ti_val, 'tf', tf_val, ...
           'disturbance_specs', disturbance_specs, 'error_tol', error_tol, ...
-          'params', params);
+          'params', params, 'num_iter', 1);
       
 % Plot the distribution of worst values
 hist(output_struct.costs)

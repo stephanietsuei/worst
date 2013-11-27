@@ -23,7 +23,6 @@ tf_val = 10;
 
 output_dim = 3;
 
-max_iterations = 10;
 error_tol = .01;
 
 nominal_input = linspace(10,0,100)';
