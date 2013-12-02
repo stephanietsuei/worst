@@ -1,7 +1,5 @@
 \documentclass{article}
 
-% Note: Building this .tex file requires the mcode package avaialble at
-% http://www.mathworks.com/matlabcentral/fileexchange/8015-m-code-latex-package
 
 \usepackage{fullpage}
 \usepackage{amsmath}
@@ -226,7 +224,14 @@ nominal input, which is described below. \\
 \texttt{nominal\_input} & \texttt{[]} & A $T$ by $q$ matrix describing the
 nominal input signal, where $T$ is the length of \texttt{nominal\_time} and $q$
 is the dimension of the nominal input. If a value for this parameter is
-specified, then so must a value for the nominal time axis. \\
+specified, then a value for the nominal time axis must also be specified. \\
+\hline
+\texttt{nominal\_output} & \texttt{[]} & A $T$ by $p$ matrix containing the
+nominal output, where $T$ is the length of \texttt{nominal\_time} and $p$ is the
+dimension of the nominal output. If this option is specified, then the program
+will not compute a nominal output like it would otherwise. If this option is
+specified, then a value for the nominal time axis (same one that corresponds to
+\texttt{nominal\_input}) must also be specified.\\
 \hline
 \texttt{averaging} & 1 (on) & Boolean value (0 or 1) that switches filtering on
 and off. Sometimes the filtering will push the distribution of costs towards the
