@@ -224,6 +224,17 @@ while ((~converged) && (iterations <= max_iterations))
     x = vector_interpolate(simout.get('xout'), t, time_axis);
     
     
+    % Check to see if we're done
+    error = max(sum((last_output-output).^2)./sum(output.^2));
+    display(error)
+    if (error < error_tol)
+        converged = 1;
+        break;
+    elseif (iterations > max_iterations)
+        break;
+    end
+    
+    
     % Align the system and get inputs for third part
     nu = output;
     if has_U
@@ -288,7 +299,9 @@ while ((~converged) && (iterations <= max_iterations))
         v.signals.values = realign_output.v;
         lambdaD = realign_output.lambdaD;
     end
-    if has_del, delta.signals.values = repmat(realign_output.params', N, 1); end
+    if has_del 
+        delta.signals.values = repmat(realign_output.params', N, 1); 
+    end
     
     
     % If we're averaging values together for stability, then repeat the
@@ -308,13 +321,8 @@ while ((~converged) && (iterations <= max_iterations))
     end
     
     
-    % Compute whether or not we're done
-    error = max(sum((last_output-output).^2)./sum(output.^2));
-    if (error < error_tol)
-        converged = 1;
-    end
+    % Increment number of iterations
     iterations = iterations + 1;
-    display(error)
 end
 
 
