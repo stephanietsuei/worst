@@ -1,6 +1,6 @@
 function out = worst_simulink(model_name, disturbance_specs, unmodeled_io, ...
     params, nominal_input, nominal_t, ti, tf, max_iterations, output_dim, ...
-    error_tol, averaging)
+    error_tol, averaging, nominal_output)
 
 % Computes the worst case error norm of a system given a proper simulink
 % model. For now, this file assumes the following
@@ -28,7 +28,7 @@ function out = worst_simulink(model_name, disturbance_specs, unmodeled_io, ...
 % ti and tf are scalars where tf > ti
 
 % assumes initial state is either specified in the model or is located in
-% the 
+% the base workspace.
 
 
 
@@ -41,17 +41,22 @@ has_U = 1;
 has_u = 1;
 has_v = 1;
 has_del = 1;
+using_out = 0;
 
-if isempty(nominal_input), has_U = 0; end
 if isempty(disturbance_specs), has_u = 0; end
 if isempty(unmodeled_io), has_v = 0; end
 if isempty(params), has_del = 0; end
-
 if isequal([has_u,has_v,has_del], [0 0 0])
     display('Why are you even using this program?')
     exit;
 end
 
+if isempty(nominal_input)
+    has_U = 0;
+end
+if ~isempty(nominal_output)
+    using_out = 1;
+end
 
 simulink_input_str1 = '';
 simulink_input_str2 = '';
@@ -103,6 +108,14 @@ end
 % nominal output.
 %------------------------------------------------------------------------------%
 
+% Set Simulink simulation parameters
+sim_parameters1.StartTime = 'nomnom_ti';
+sim_parameters1.StopTime = 'nomnom_tf';
+sim_parameters1.LoadExternalInput = 'on';
+sim_parameters1.ExternalInput = simulink_input_str1;
+assignin('base', 'nomnom_ti', ti);
+assignin('base', 'nomnom_tf', tf);
+    
 % Make empty inputs, and then put the inputs in the base workspace where
 % Simulink can find them
 if has_u
@@ -129,22 +142,21 @@ if has_U
     U.signals.dimensions = size(nominal_input,2);
     assignin('base', 'nomnom_U', U);
 end
-assignin('base', 'nomnom_ti', ti);
-assignin('base', 'nomnom_tf', tf);
-
-
-% Set simulation parameters and simulate the system
-sim_parameters1.StartTime = 'nomnom_ti';
-sim_parameters1.StopTime = 'nomnom_tf';
-sim_parameters1.LoadExternalInput = 'on';
-sim_parameters1.ExternalInput = simulink_input_str1;
-simout = sim(model_name, sim_parameters1);
-time_axis = simout.get('tout');
-nominal_output = simout.get('yout');
-nominal_output = nominal_output(:,1:output_dim);
+    
+% Simulate the system if we weren't given a nominal output
+if ~using_out
+    
+    % Set simulation parameters and simulate the system if we weren't given a
+    % nominal output
+    simout = sim(model_name, sim_parameters1);
+    time_axis = simout.get('tout');
+    nominal_output = simout.get('yout');
+    nominal_output = nominal_output(:,1:output_dim);
+else
+    time_axis = nominal_t;
+end
 
 N = length(time_axis);
-
 
 
 %------------------------------------------------------------------------------%
@@ -297,7 +309,7 @@ while ((~converged) && (iterations <= max_iterations))
     
     
     % Compute whether or not we're done
-    error = max(sum((last_output-output).^2)./sum(last_output.^2));
+    error = max(sum((last_output-output).^2)./sum(output.^2));
     if (error < error_tol)
         converged = 1;
     end

@@ -8,6 +8,7 @@ addRequired(simulink_parse, 'output_dim', @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'tf', 10, @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'ti', 0, @(x) isa(x, 'double'));
 addParamValue(simulink_parse, 'nominal_input', [], @(x) isa(x,'double'));
+addParamValue(simulink_parse, 'nominal_output', [], @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'nominal_time', [], @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'disturbance_specs', [], @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'unmodeled_io', [], @(x) isa(x,'double'));
@@ -24,6 +25,7 @@ disturbance_specs = simulink_parse.Results.disturbance_specs;
 error_tol = simulink_parse.Results.error_tol;
 max_iter = simulink_parse.Results.max_iter;
 nominal_input = simulink_parse.Results.nominal_input;
+nominal_output = simulink_parse.Results.nominal_output;
 nominal_time = simulink_parse.Results.nominal_time;
 output_dim = simulink_parse.Results.output_dim;
 params = simulink_parse.Results.params;
@@ -71,7 +73,7 @@ if ~isempty(unmodeled_io), output.v = cell(1,num_iter); end;
 for i = 1:num_iter
     output_struct = worst_simulink(system_name, disturbance_specs, ...
         unmodeled_io, params, nominal_input, nominal_time, ti, tf, max_iter, ...
-        output_dim, error_tol, averaging);
+        output_dim, error_tol, averaging, nominal_output);
     output.costs(i) = output_struct.cost;
     output.converged(i) = output_struct.converged;
     output.time_axis{i} = output_struct.time_axis;
