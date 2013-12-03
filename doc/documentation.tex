@@ -197,19 +197,19 @@ below:
 \hline 
 \texttt{tf} & 10 & Simulation end time in seconds \\
 \hline
-\texttt{params} & \texttt{[]} & A $p$ by 3 matrix where $p$ is the number of
+\texttt{params} & \texttt{[ ]} & A $p$ by 3 matrix where $p$ is the number of
 uncertain scalar parameters. Each row has the format:
 \texttt{[lower\_bound, nominal\_value, upper\_bound]}\\
 \hline
-\texttt{disturbance\_specs} & \texttt{[]} & A $d$ by 2 matrix where $d$ is the
+\texttt{disturbance\_specs} & \texttt{[ ]} & A $d$ by 2 matrix where $d$ is the
 number of disturbances. Each row has the format:
 
 \texttt{[disturbance\_dimension, disturbance\_norm]} \\
 \hline
-\texttt{unmodeled\_io} & \texttt{[]} & A $b$ by 2 matrix where $b$ is the number
-of unmodeled input-output pairs. The left column has all the dimensions of the
-unmodeled inputs $\mathbf{v}$ and the right column has all the corresponding
-dimensions of the unmodeled outputs $\mathbf{z}$.\\
+\texttt{unmodeled\_io} & \texttt{[ ]} & A $b$ by 2 matrix where $b$ is the
+number of unmodeled input-output pairs. The left column has all the dimensions
+of the unmodeled inputs $\mathbf{v}$ and the right column has all the
+corresponding dimensions of the unmodeled outputs $\mathbf{z}$.\\
 \hline
 \texttt{max\_iter} & 40 & The maximum number of times to iterate the algorithm
 when computing a single value of $J$.\\
@@ -218,15 +218,15 @@ when computing a single value of $J$.\\
 \hline
 \texttt{num\_iter} & 10 & The number of different values of $J$ to compute. \\
 \hline
-\texttt{nominal\_time} & \texttt{[]} & The time axis, a column vector for the
+\texttt{nominal\_time} & \texttt{[ ]} & The time axis, a column vector for the
 nominal input, which is described below. \\
 \hline
-\texttt{nominal\_input} & \texttt{[]} & A $T$ by $q$ matrix describing the
+\texttt{nominal\_input} & \texttt{[ ]} & A $T$ by $q$ matrix describing the
 nominal input signal, where $T$ is the length of \texttt{nominal\_time} and $q$
 is the dimension of the nominal input. If a value for this parameter is
 specified, then a value for the nominal time axis must also be specified. \\
 \hline
-\texttt{nominal\_output} & \texttt{[]} & A $T$ by $p$ matrix containing the
+\texttt{nominal\_output} & \texttt{[ ]} & A $T$ by $p$ matrix containing the
 nominal output, where $T$ is the length of \texttt{nominal\_time} and $p$ is the
 dimension of the nominal output. If this option is specified, then the program
 will not compute a nominal output like it would otherwise. If this option is
@@ -237,12 +237,27 @@ specified, then a value for the nominal time axis (same one that corresponds to
 and off. Sometimes the filtering will push the distribution of costs towards the
 largest value.\\
 \hline
+\texttt{plot\_cost} & 0 (off) & Boolean value (0 or 1). The value of the current
+cost will be plotted at the end of each iteration when equal to 1. \\
+\hline
+\texttt{plot\_d} & 0 (off) & Boolean value (0 or 1). Will plot the newly
+computed disturbance signal at the end of each iteration if set to 1. \\
+\hline
+\texttt{plot\_v} & 0 (off) & Boolean value (0 or 1). Will plot the value of the
+unmodeled feedback input at each iteration if set to 1. \\
+\hline
+\texttt{plot\_parm} & 0 (off) & Boolean value (0 or 1). Will plot the current
+value of the uncertain parameters at each iteration if set to 1. \\
+\hline
+\texttt{plot\_error} & 0 (off) & Boolean value (0 or 1). Plots the current error
+signal if set to 1. \\
+\hline
 \end{tabular}
 \label{inputparameters}
 \end{center}
 \end{table}
 
-Optional inputs whose default value is \texttt{[]} do not need to be specified
+Optional inputs whose default value is \texttt{[ ]} do not need to be specified
 and are not necessary for the program to run. If there are no uncertain
 parameters in the system, do not specify any uncertain parameters.
 

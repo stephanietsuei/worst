@@ -21,6 +21,7 @@ addParamValue(simulink_parse, 'plot_cost', 0, @(x) ismember(x, [0 1]))
 addParamValue(simulink_parse, 'plot_d', 0, @(x) ismember(x, [0 1]))
 addParamValue(simulink_parse, 'plot_v', 0, @(x) ismember(x, [0 1]))
 addParamValue(simulink_parse, 'plot_parm', 0, @(x) ismember(x, [0 1]))
+addParamValue(simulink_parse, 'plot_error', 0, @(x) ismember(x, [0 1]))
 
 
 % Parse input for each type of input
@@ -43,6 +44,7 @@ plot_cost = simulink_parse.Results.plot_cost;
 plot_d = simulink_parse.Results.plot_d;
 plot_v = simulink_parse.Results.plot_v;
 plot_parm = simulink_parse.Results.plot_parm;
+plot_error = simulink_parse.Results.plot_error;
 
 
 % Some more input checking
@@ -82,7 +84,7 @@ for i = 1:num_iter
     output_struct = worst_simulink(system_name, disturbance_specs, ...
         unmodeled_io, params, nominal_input, nominal_time, ti, tf, max_iter, ...
         output_dim, error_tol, averaging, nominal_output, plot_cost, plot_d, ...
-        plot_v, plot_parm);
+        plot_v, plot_parm, plot_error);
     output.costs(i) = output_struct.cost;
     output.converged(i) = output_struct.converged;
     output.time_axis{i} = output_struct.time_axis;

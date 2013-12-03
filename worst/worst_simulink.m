@@ -1,6 +1,7 @@
 function out = worst_simulink(model_name, disturbance_specs, unmodeled_io, ...
     params, nominal_input, nominal_t, ti, tf, max_iterations, output_dim, ...
-    error_tol, averaging, nominal_output, plot_cost, plot_d, plot_v, plot_parm)
+    error_tol, averaging, nominal_output, plot_cost, plot_d, plot_v, ...
+    plot_parm, plot_error)
 
 % Computes the worst case error norm of a system given a proper simulink
 % model. For now, this file assumes the following
@@ -193,19 +194,20 @@ figure_cost = 500;
 figure_d = 501;
 figure_v = 502;
 figure_parm = 503;
+figure_error = 504;
 if plot_cost
     figure(figure_cost)
     hold on
     xlabel('Iteration Number')
     ylabel('Cost')
-    title('Cost at each Iteration')
+    title('Cost at Each Iteration')
 end
 if plot_d
     figure(figure_d)
     hold on
     xlabel('Time')
     ylabel('Disturbance')
-    title('Disturbance Inputs')
+    title('Disturbance Inputs at Each Iteration')
 end
 if plot_v
     figure(figure_v)
@@ -219,7 +221,14 @@ if plot_parm
     hold on
     xlabel('Iteration Number')
     ylabel('Parameter Value')
-    title('Parameter Values at each Iteration')
+    title('Parameter Values at Each Iteration')
+end
+if plot_error
+    figure(figure_error)
+    hold on
+    xlabel('Time')
+    ylabel('Error Signal')
+    title('Error Signals at Each Iteration')
 end
 
 
@@ -376,6 +385,11 @@ while ((~converged) && (iterations <= max_iterations))
     if plot_parm
         figure(figure_parm)
         plot(iterations*ones(num_params,1), delta.signals.values(1,:)', '*b')
+        drawnow
+    end
+    if plot_error
+        figure(figure_error)
+        plot(repmat(time_axis,1,output_dim), output)
         drawnow
     end
     
