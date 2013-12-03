@@ -17,6 +17,10 @@ addParamValue(simulink_parse, 'max_iter', 40, @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'error_tol', .01, @(x) isa(x,'double'));
 addParamValue(simulink_parse, 'num_iter', 10, @(x) ((mod(x,1)==0) && (x > 0)))
 addParamValue(simulink_parse, 'averaging', 1, @(x) ismember(x, [0 1]))
+addParamValue(simulink_parse, 'plot_cost', 0, @(x) ismember(x, [0 1]))
+addParamValue(simulink_parse, 'plot_d', 0, @(x) ismember(x, [0 1]))
+addParamValue(simulink_parse, 'plot_v', 0, @(x) ismember(x, [0 1]))
+addParamValue(simulink_parse, 'plot_parm', 0, @(x) ismember(x, [0 1]))
 
 
 % Parse input for each type of input
@@ -35,6 +39,10 @@ ti = simulink_parse.Results.ti;
 unmodeled_io = simulink_parse.Results.unmodeled_io;
 num_iter = simulink_parse.Results.num_iter;
 averaging = simulink_parse.Results.averaging;
+plot_cost = simulink_parse.Results.plot_cost;
+plot_d = simulink_parse.Results.plot_d;
+plot_v = simulink_parse.Results.plot_v;
+plot_parm = simulink_parse.Results.plot_parm;
 
 
 % Some more input checking
@@ -73,7 +81,8 @@ if ~isempty(unmodeled_io), output.v = cell(1,num_iter); end;
 for i = 1:num_iter
     output_struct = worst_simulink(system_name, disturbance_specs, ...
         unmodeled_io, params, nominal_input, nominal_time, ti, tf, max_iter, ...
-        output_dim, error_tol, averaging, nominal_output);
+        output_dim, error_tol, averaging, nominal_output, plot_cost, plot_d, ...
+        plot_v, plot_parm);
     output.costs(i) = output_struct.cost;
     output.converged(i) = output_struct.converged;
     output.time_axis{i} = output_struct.time_axis;

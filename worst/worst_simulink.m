@@ -1,6 +1,6 @@
 function out = worst_simulink(model_name, disturbance_specs, unmodeled_io, ...
     params, nominal_input, nominal_t, ti, tf, max_iterations, output_dim, ...
-    error_tol, averaging, nominal_output)
+    error_tol, averaging, nominal_output, plot_cost, plot_d, plot_v, plot_parm)
 
 % Computes the worst case error norm of a system given a proper simulink
 % model. For now, this file assumes the following
@@ -160,7 +160,7 @@ N = length(time_axis);
 
 
 %------------------------------------------------------------------------------%
-% Initialize worst case signals
+% Initialize worst case signals and open plots
 %------------------------------------------------------------------------------%
 
 % Initialize disturbance and unmodeled input signals, normalize
@@ -186,6 +186,41 @@ end
 
 % Initialize costate for unmodeled inputs
 if has_v, lambdaD = ones(1, num_unmodeled_in); end
+
+
+% Open up figures if we're plotting stuff at the end of each iteration
+figure_cost = 500;
+figure_d = 501;
+figure_v = 502;
+figure_parm = 503;
+if plot_cost
+    figure(figure_cost)
+    hold on
+    xlabel('Iteration Number')
+    ylabel('Cost')
+    title('Cost at each Iteration')
+end
+if plot_d
+    figure(figure_d)
+    hold on
+    xlabel('Time')
+    ylabel('Disturbance')
+    title('Disturbance Inputs')
+end
+if plot_v
+    figure(figure_v)
+    hold on
+    xlabel('Time')
+    ylabel('Feedback input')
+    title('Uncertain Feedback Inputs')
+end
+if plot_parm
+    figure(figure_parm)
+    hold on
+    xlabel('Iteration Number')
+    ylabel('Parameter Value')
+    title('Parameter Values at each Iteration')
+end
 
 
 %------------------------------------------------------------------------------%
@@ -224,7 +259,8 @@ while ((~converged) && (iterations <= max_iterations))
     x = vector_interpolate(simout.get('xout'), t, time_axis);
     
     
-    % Check to see if we're done
+    % Check to see if we're done and compute the current cost
+    current_cost = sum(trapz(time_axis, output.^2));
     error = max(sum((last_output-output).^2)./sum(output.^2));
     display(error)
     if (error < error_tol)
@@ -321,6 +357,29 @@ while ((~converged) && (iterations <= max_iterations))
     end
     
     
+    % Update plots if selected
+    if plot_cost
+        figure(figure_cost)
+        plot(iterations, current_cost, '*b')
+        drawnow
+    end
+    if plot_d
+        figure(figure_d)
+        plot(repmat(time_axis,1,total_disturbance_dim), u.signals.values)
+        drawnow
+    end
+    if plot_v
+        figure(figure_v)
+        plot(repmat(time_axis,1,total_v_dim), v.signals.values)
+        drawnow
+    end
+    if plot_parm
+        figure(figure_parm)
+        plot(iterations*ones(num_params,1), delta.signals.values(1,:)', '*b')
+        drawnow
+    end
+    
+    
     % Increment number of iterations
     iterations = iterations + 1;
 end
@@ -337,7 +396,7 @@ if has_u, out.d = u.signals.values; end;
 if has_v, out.v = v.signals.values; end;
 if has_del, out.parm = delta.signals.values(1,:)'; end;
 out.time_axis = time_axis;
-out.cost = sum(trapz(time_axis, (last_output-output).^2));
+out.cost = current_cost;
 out.converged = converged;
 
 end
