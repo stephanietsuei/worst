@@ -190,41 +190,36 @@ if has_v, lambdaD = ones(1, num_unmodeled_in); end
 
 
 % Open up figures if we're plotting stuff at the end of each iteration
-figure_cost = 500;
-figure_d = 501;
-figure_v = 502;
-figure_parm = 503;
-figure_error = 504;
 if plot_cost
-    figure(figure_cost)
+    figure_cost = figure;
     hold on
     xlabel('Iteration Number')
     ylabel('Cost')
     title('Cost at Each Iteration')
 end
 if plot_d
-    figure(figure_d)
+    figure_d = figure;
     hold on
     xlabel('Time')
     ylabel('Disturbance')
     title('Disturbance Inputs at Each Iteration')
 end
 if plot_v
-    figure(figure_v)
+    figure_v = figure;
     hold on
     xlabel('Time')
     ylabel('Feedback input')
     title('Uncertain Feedback Inputs')
 end
 if plot_parm
-    figure(figure_parm)
+    figure_parm = figure;
     hold on
     xlabel('Iteration Number')
     ylabel('Parameter Value')
     title('Parameter Values at Each Iteration')
 end
 if plot_error
-    figure(figure_error)
+    figure_error = figure;
     hold on
     xlabel('Time')
     ylabel('Error Signal')

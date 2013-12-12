@@ -36,5 +36,5 @@ output_struct = ...
           'plot_d', 1, 'plot_v', 1, 'plot_parm', 1);
       
 % Plot the distribution of worst values
-figure(1)
+figure
 hist(output_struct.costs)

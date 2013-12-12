@@ -32,4 +32,5 @@ output_struct = ...
           'params', params, 'num_iter', 1);
       
 % Plot the distribution of worst values
+figure
 hist(output_struct.costs)
