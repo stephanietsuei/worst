@@ -48,13 +48,13 @@ end
 [time, soln] = ode45(@back_deriv, [t(N), t(1)], zeros(state_dim+num_params,1));
 
 % Interpolate signals
-soln = vector_interpolate(soln, time, t);
+soln = interp1(time, soln, t);
 
 
 % Compute the output
 output = zeros(N, total_udim+total_vdim);
 for i = 1:N
-    Ui = vector_interpolate(U, Ut, t(i))';
+    Ui = interp1(Ut, U, t(i))';
     if has_u, now_u = u(i,:)'; else now_u = []; end;
     if has_v, now_v = v(i,:)'; else now_v = []; end;
     [~,B,~,D] = linmod(model_name, x(i,:)', [Ui; now_u; now_v; params]);
@@ -108,12 +108,13 @@ end
 % Nested derivative function. Uses linmod to take jacobians
 function deriv = back_deriv(time, lambda)
 
-    cur_x = vector_interpolate(x,t,time)';
-    cur_u = vector_interpolate(u,t,time)';
-    cur_v = vector_interpolate(v,t,time)';
-    cur_nu = vector_interpolate(nu,t,time)';
-    cur_xi = vector_interpolate(xi,t,time)';
-    cur_U = vector_interpolate(U,Ut,time)';
+    cur_x = interp1(t, x, time)';
+    cur_nu = interp1(t, nu, time)';
+    cur_u = []; cur_v = []; cur_xi = []; cur_U = [];
+    if has_u, cur_u = interp1(t, u, time)'; end
+    if has_v, cur_v = interp1(t, v, time)'; end
+    if has_v, cur_xi = interp1(t, xi, time)'; end
+    if has_U, cur_U = interp1(Ut, U, time)'; end
     
     [Ai,Bi,Ci,Di] = linmod(model_name, cur_x, [cur_U; cur_u; cur_v; params]);
     

@@ -260,12 +260,12 @@ while ((~converged) && (iterations <= max_iterations))
     simout = sim(model_name, options_struct);
     t = simout.get('tout');
     yout = simout.get('yout');
-    output = vector_interpolate(yout(:,1:output_dim), t, time_axis);
+    output = interp1(t, yout(:,1:output_dim), time_axis);
     output = output - nominal_output;
     if has_v
-        z = vector_interpolate(yout(:,output_dim+1:end), t, time_axis);
+        z = interp1(t, yout(:,output_dim+1:end), time_axis);
     end
-    x = vector_interpolate(simout.get('xout'), t, time_axis);
+    x = interp1(t, simout.get('xout'), time_axis);
     
     
     % Check to see if we're done and compute the current cost
