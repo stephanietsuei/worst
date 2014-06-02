@@ -364,7 +364,7 @@ while ((~converged) && (iterations <= max_iterations))
     % Update plots if selected
     if plot_cost
         figure(figure_cost)
-        plot(iterations, current_cost, '*b')
+        bar(iterations, current_cost)
         drawnow
     end
     if plot_d
@@ -379,7 +379,7 @@ while ((~converged) && (iterations <= max_iterations))
     end
     if plot_parm
         figure(figure_parm)
-        plot(iterations*ones(num_params,1), delta.signals.values(1,:)', '*b')
+        plot(iterations*ones(num_params,1), delta.signals.values(1,:)', '*')
         drawnow
     end
     if plot_error
@@ -407,5 +407,26 @@ if has_del, out.parm = delta.signals.values(1,:)'; end;
 out.time_axis = time_axis;
 out.cost = current_cost;
 out.converged = converged;
+
+
+% Mark final disturbance signal, error signal, and unmodeled dynamics
+% signal on plots
+if plot_d
+    figure(figure_d)
+    plot(repmat(time_axis,1,total_disturbance_dim), u.signals.values, '*')
+    drawnow
+end
+
+if plot_error
+    figure(figure_error)
+    plot(repmat(time_axis,1,output_dim), output, '*')
+    drawnow
+end
+
+if plot_v
+    figure(figure_v)
+    plot(repmat(time_axis,1,total_v_dim), v.signals.values, '*')
+    drawnow    
+end
 
 end
