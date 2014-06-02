@@ -413,19 +413,19 @@ out.converged = converged;
 % signal on plots
 if plot_d
     figure(figure_d)
-    plot(repmat(time_axis,1,total_disturbance_dim), u.signals.values, '*')
+    plot(repmat(time_axis,1,total_disturbance_dim), u.signals.values, 'o')
     drawnow
 end
 
 if plot_error
     figure(figure_error)
-    plot(repmat(time_axis,1,output_dim), output, '*')
+    plot(repmat(time_axis,1,output_dim), output, 'o')
     drawnow
 end
 
 if plot_v
     figure(figure_v)
-    plot(repmat(time_axis,1,total_v_dim), v.signals.values, '*')
+    plot(repmat(time_axis,1,total_v_dim), v.signals.values, 'o')
     drawnow    
 end
 
