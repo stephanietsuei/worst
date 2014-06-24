@@ -219,11 +219,14 @@ if plot_parm
     title('Parameter Values at Each Iteration')
 end
 if plot_error
-    figure_error = figure;
-    hold on
-    xlabel('Time')
-    ylabel('Error Signal')
-    title('Error Signals at Each Iteration')
+    figure_error = cell(output_dim,1);
+    for i = 1:output_dim
+        figure_error{i} = figure;
+        hold on
+        xlabel('Time')
+        ylabel('Error Signal')
+        title(['Dimension ' num2str(i) 'of Error Signal at Each Iteration'])
+    end
 end
 
 
@@ -383,9 +386,12 @@ while ((~converged) && (iterations <= max_iterations))
         drawnow
     end
     if plot_error
-        figure(figure_error)
-        plot(repmat(time_axis,1,output_dim), output)
-        drawnow
+        error_lines = cell(output_dim, 1);
+        for i = 1:output_dim
+            figure(figure_error{i});
+            error_lines{i} = plot(time_axis, output(:,i));
+            drawnow
+        end
     end
     
     
@@ -418,9 +424,13 @@ if plot_d
 end
 
 if plot_error
-    figure(figure_error)
-    plot(repmat(time_axis,1,output_dim), output, 'o')
-    drawnow
+    for i = 1:output_dim
+        figure(figure_error{i})
+        final_error = plot(time_axis, output(:,i), 'o');
+        drawnow
+        legend([error_lines{i}, final_error], ...
+            {'Intermediate Error Signals', 'Final Error Signal'});
+    end
 end
 
 if plot_v
